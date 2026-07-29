@@ -19,21 +19,23 @@ body{
   margin:0; padding:24px 16px 64px; background:var(--surface-0); color:var(--text-primary);
   font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif; line-height:1.6;
 }
-.wrap{max-width:840px; margin:0 auto;}
+.wrap{max-width:880px; margin:0 auto;}
 h1{font-size:22px; font-weight:600; margin:0 0 4px;}
 .subtitle{font-size:14px; color:var(--text-secondary); margin:0 0 24px;}
 .card{background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:16px;}
 label{font-size:13px; color:var(--text-secondary); display:block; margin-bottom:6px;}
-input[type=text], textarea{
+input[type=text], input[type=url], textarea{
   width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px;
   border-radius:var(--radius); border:1px solid var(--border); background:var(--surface-1); color:var(--text-primary);
 }
 textarea{resize:vertical;}
 .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:12px;}
-.hint{font-size:12px; color:var(--text-muted); margin:0;}
+.grid3{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;}
+.hint{font-size:12px; color:var(--text-muted); margin:8px 0 0;}
+.row{display:flex; gap:8px;}
 button{
   font-family:inherit; font-size:14px; font-weight:500; padding:9px 16px; border-radius:var(--radius);
-  border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text-primary); cursor:pointer;
+  border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text-primary); cursor:pointer; white-space:nowrap;
 }
 button:hover{background:var(--surface-1);}
 button.primary{background:var(--text-accent); color:#fff; border-color:var(--text-accent);}
@@ -47,13 +49,14 @@ button.primary:hover{opacity:0.9;}
 .sec-card h3{font-size:14px; font-weight:600; margin:0 0 8px;}
 .sec-card ul{margin:0; padding-left:18px; font-size:13px; color:var(--text-secondary); line-height:1.8;}
 .tag{font-size:13px; padding:4px 12px; border-radius:var(--radius); display:inline-block;}
+.summary-box{background:var(--bg-accent); border-radius:var(--radius); padding:16px 20px; font-size:14px; color:var(--text-accent); line-height:1.7;}
 footer{font-size:12px; color:var(--text-muted); text-align:center; margin-top:32px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 <h1>채용공고 직무 분석기</h1>
-<p class="subtitle">채용공고를 붙여넣거나 캡처 이미지를 업로드하면 주요업무·자격요건·우대사항, 핵심 키워드, 자소서·면접 준비 포인트를 정리해드립니다.</p>
+<p class="subtitle">채용공고 링크, 텍스트, 캡처 이미지 중 편한 방법으로 입력하면 직무 요약, 주요업무·자격요건·우대사항, KSA 기반 필요 역량, 자소서·면접 준비 포인트를 정리해드립니다.</p>
 
 <div class="card">
   <div class="grid2">
@@ -70,6 +73,15 @@ footer{font-size:12px; color:var(--text-muted); text-align:center; margin-top:32
 </div>
 
 <div class="card">
+  <label for="url-input">채용공고 링크 (선택, 베타)</label>
+  <div class="row">
+    <input id="url-input" type="url" placeholder="https://...">
+    <button id="btn-fetch-url">가져오기</button>
+  </div>
+  <p class="hint" id="url-status">사이트에 따라 자동 추출이 안 될 수 있어요. 안 되면 캡처 이미지나 텍스트 붙여넣기를 이용해주세요.</p>
+</div>
+
+<div class="card">
   <label>채용공고 이미지 (캡처 붙여넣기)</label>
   <div id="paste-zone" tabindex="0">
     <p style="font-size:13px; color:var(--text-secondary); margin:0 0 6px;">이 영역을 클릭 후 <b>Ctrl+V</b>로 캡처 이미지를 붙여넣거나</p>
@@ -81,7 +93,7 @@ footer{font-size:12px; color:var(--text-muted); text-align:center; margin-top:32
 </div>
 
 <div class="card">
-  <label for="jd-input">채용공고 텍스트 (이미지 인식 결과가 여기에 추가됩니다)</label>
+  <label for="jd-input">채용공고 텍스트 (링크/이미지 인식 결과가 여기에 추가됩니다)</label>
   <textarea id="jd-input" rows="10" placeholder="채용공고 전체 내용을 붙여넣으세요 (주요업무, 자격요건, 우대사항 포함)"></textarea>
   <div style="display:flex; gap:8px; margin-top:12px;">
     <button class="primary" id="btn-analyze">분석하기</button>
@@ -94,21 +106,21 @@ footer{font-size:12px; color:var(--text-muted); text-align:center; margin-top:32
   <p style="font-size:14px; color:var(--text-muted); text-align:center; padding:2rem 0;">채용공고를 입력하고 분석하기를 누르면 결과가 여기에 표시됩니다.</p>
 </div>
 
-<footer>이미지 텍스트 인식(OCR)은 인터넷 연결이 필요합니다. 그 외 모든 분석 기능은 오프라인에서 작동합니다.</footer>
+<footer>이미지 텍스트 인식(OCR)과 링크 가져오기는 인터넷 연결이 필요합니다. 그 외 모든 분석 기능은 오프라인에서 작동합니다.</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-const KEYWORD_DB = {
-  "직무역량 (하드스킬)": { bg:"var(--bg-accent)", text:"var(--text-accent)", words:["엑셀","파워포인트","PPT","워드","SQL","Python","파이썬","데이터분석","데이터 분석","마케팅","콘텐츠","기획","디자인","포토샵","Photoshop","일러스트","회계","재무","인사","HR","영업","고객관리","CRM","영어","어학","자격증","통계","리서치","프로젝트관리","코딩","개발","SNS","브랜딩","광고","카피라이팅","문서작성","보고서","오피스","협상","물류","구매","품질관리","연구개발"] },
-  "커뮤니케이션·협업": { bg:"var(--bg-success)", text:"var(--text-success)", words:["커뮤니케이션","협업","팀워크","소통","협력","대인관계","조율","갈등관리","프레젠테이션","발표력","네트워킹","고객응대"] },
-  "태도·마인드셋": { bg:"var(--bg-warning)", text:"var(--text-warning)", words:["책임감","적극성","성실함","성실성","열정","주도적","자기주도","도전정신","꼼꼼함","세심함","창의력","창의성","논리적사고","문제해결","분석력","실행력","리더십","오너십","자기계발","학습능력","긍정적","목표지향","자기관리","꾸준함"] }
+const KSA_DB = {
+  "지식 (Knowledge)": { bg:"var(--bg-accent)", text:"var(--text-accent)", words:["마케팅","회계","재무","인사","법률","통계","콘텐츠","브랜딩","광고","연구개발","품질관리","물류","구매","HR","CRM","고객관리","시장조사","트렌드"] },
+  "기술 (Skills)": { bg:"var(--bg-success)", text:"var(--text-success)", words:["엑셀","파워포인트","PPT","워드","SQL","Python","파이썬","데이터분석","데이터 분석","포토샵","Photoshop","일러스트","영어","어학","자격증","리서치","프로젝트관리","코딩","개발","SNS","카피라이팅","문서작성","보고서","오피스","협상"] },
+  "능력 (Abilities)": { bg:"var(--bg-warning)", text:"var(--text-warning)", words:["커뮤니케이션","협업","팀워크","소통","협력","대인관계","조율","갈등관리","프레젠테이션","발표력","네트워킹","고객응대","책임감","적극성","성실함","성실성","열정","주도적","자기주도","도전정신","꼼꼼함","세심함","창의력","창의성","논리적사고","문제해결","분석력","실행력","리더십","오너십","자기계발","학습능력","긍정적","목표지향","자기관리","꾸준함"] }
 };
 
 const QUESTION_BANK = {
-  "직무역량 (하드스킬)": ["관련 툴이나 역량을 실제로 활용해본 프로젝트 경험을 구체적으로 말씀해주세요.", "해당 직무에 필요한 역량을 키우기 위해 어떤 노력을 했나요?"],
-  "커뮤니케이션·협업": ["팀 프로젝트에서 의견 차이를 조율했던 경험이 있나요?", "이해관계자와 소통하며 어려웠던 점과 해결 방법을 말씀해주세요."],
-  "태도·마인드셋": ["목표를 스스로 설정하고 주도적으로 실행한 경험이 있나요?", "예상치 못한 문제 상황을 해결했던 경험을 말씀해주세요."]
+  "지식 (Knowledge)": ["해당 직무 분야의 이론이나 지식을 어떻게 습득했나요?", "관련 산업/시장에 대해 알고 있는 최신 이슈가 있나요?"],
+  "기술 (Skills)": ["관련 툴이나 기술을 실제로 활용해본 프로젝트 경험을 구체적으로 말씀해주세요.", "해당 직무에 필요한 기술을 키우기 위해 어떤 노력을 했나요?"],
+  "능력 (Abilities)": ["팀 프로젝트에서 의견 차이를 조율했던 경험이 있나요?", "목표를 스스로 설정하고 주도적으로 실행한 경험이 있나요?"]
 };
 
 const HEADER_PATTERNS = {
@@ -157,6 +169,24 @@ function extractSections(text){
   return sections;
 }
 
+function buildSummary(title, sections, matched){
+  const work = sections["주요업무"].slice(0,2).join(", ");
+  const byCat = {};
+  for(const cat of Object.keys(KSA_DB)){
+    const top = matched.filter(function(m){ return m.cat===cat; })[0];
+    byCat[cat] = top ? top.word : "";
+  }
+  const parts = [];
+  if(work) parts.push("주로 " + work + " 등의 업무를 수행하며");
+  const ksaParts = [];
+  if(byCat["지식 (Knowledge)"]) ksaParts.push('"' + byCat["지식 (Knowledge)"] + '" 관련 지식');
+  if(byCat["기술 (Skills)"]) ksaParts.push('"' + byCat["기술 (Skills)"] + '" 기술');
+  if(byCat["능력 (Abilities)"]) ksaParts.push('"' + byCat["능력 (Abilities)"] + '" 역량');
+  if(ksaParts.length) parts.push(ksaParts.join(", ") + "가 요구되는 직무입니다.");
+  if(!parts.length) return (title || "이 직무") + "에 대한 정보를 조금 더 채용공고에서 확인해보세요.";
+  return (title || "이 직무") + "은(는) " + parts.join(" ");
+}
+
 function analyze(){
   const text = document.getElementById("jd-input").value.trim();
   const results = document.getElementById("results");
@@ -171,8 +201,8 @@ function analyze(){
   const sections = extractSections(text);
 
   const matched = [];
-  for(const cat of Object.keys(KEYWORD_DB)){
-    const def = KEYWORD_DB[cat];
+  for(const cat of Object.keys(KSA_DB)){
+    const def = KSA_DB[cat];
     for(const w of def.words){
       const c = countOccurrences(text, w);
       if(c>0) matched.push({cat, word:w, count:c, bg:def.bg, text:def.text});
@@ -184,13 +214,15 @@ function analyze(){
 
   let html = "";
 
+  html += '<div class="card summary-box">' + buildSummary(title, sections, matched) + '</div>';
+
   html += '<div class="grid2">';
   html += '<div class="metric"><p>직무명</p><p>'+title+'</p></div>';
   html += '<div class="metric"><p>매칭된 핵심 키워드</p><p>'+totalKeywords+'개</p></div>';
   html += '</div>';
 
   const sectionMeta = ["주요업무","자격요건","우대사항"];
-  html += '<div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">';
+  html += '<div class="grid3">';
   for(const key of sectionMeta){
     const items = sections[key];
     html += '<div class="sec-card"><h3>'+key+'</h3>';
@@ -206,9 +238,10 @@ function analyze(){
   html += '</div>';
 
   html += '<div class="card">';
-  html += '<h3 style="font-size:14px;font-weight:600;margin:0 0 12px;">핵심 역량·키워드</h3>';
-  for(const cat of Object.keys(KEYWORD_DB)){
-    const items = matched.filter(m=>m.cat===cat);
+  html += '<h3 style="font-size:14px;font-weight:600;margin:0 0 4px;">직무 필요 역량 (KSA)</h3>';
+  html += '<p class="hint" style="margin:0 0 12px;">Knowledge(지식) · Skills(기술) · Abilities(능력) 기준으로 채용공고에서 추출한 키워드입니다.</p>';
+  for(const cat of Object.keys(KSA_DB)){
+    const items = matched.filter(function(m){ return m.cat===cat; });
     if(!items.length) continue;
     html += '<div style="margin-bottom:10px;">';
     html += '<p style="font-size:12px;color:var(--text-muted);margin:0 0 6px;">'+cat+'</p>';
@@ -230,7 +263,7 @@ function analyze(){
     topMatches.push(m);
     if(topMatches.length>=5) break;
   }
-  const matchedCats = [...new Set(matched.map(m=>m.cat))];
+  const matchedCats = [...new Set(matched.map(function(m){ return m.cat; }))];
 
   html += '<div class="card">';
   html += '<h3 style="font-size:14px;font-weight:600;margin:0 0 10px;">자소서·면접 준비 포인트</h3>';
@@ -238,8 +271,8 @@ function analyze(){
     html += '<ul style="margin:0 0 14px;padding-left:18px;font-size:13px;color:var(--text-secondary);line-height:1.8;">';
     for(const m of topMatches){
       let tip = "";
-      if(m.cat==="직무역량 (하드스킬)") tip = '"'+m.word+'"를 실제로 활용하거나 학습한 경험을 구체적 사례로 정리해보세요.';
-      else if(m.cat==="커뮤니케이션·협업") tip = '"'+m.word+'" 역량을 보여줄 수 있는 팀 활동 경험을 준비해보세요.';
+      if(m.cat==="지식 (Knowledge)") tip = '"'+m.word+'" 관련 지식을 어떻게 쌓아왔는지 구체적 사례로 정리해보세요.';
+      else if(m.cat==="기술 (Skills)") tip = '"'+m.word+'"를 실제로 활용하거나 학습한 경험을 구체적 사례로 정리해보세요.';
       else tip = '"'+m.word+'"를 발휘했던 순간을 상황-행동-결과(STAR) 구조로 정리해보세요.';
       html += '<li>'+tip+'</li>';
     }
@@ -284,6 +317,18 @@ function readFileAsDataUrl(file){
   });
 }
 
+async function fetchJobUrl(url){
+  const proxied = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+  const res = await fetch(proxied);
+  if(!res.ok) throw new Error("fetch failed");
+  const html = await res.text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("script,style,noscript,nav,header,footer,svg,iframe").forEach(function(el){ el.remove(); });
+  let text = doc.body ? doc.body.textContent : "";
+  text = text.replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n").trim();
+  return text;
+}
+
 document.getElementById("btn-analyze").addEventListener("click", analyze);
 document.getElementById("btn-example").addEventListener("click", function(){
   document.getElementById("jd-input").value = EXAMPLE_TEXT;
@@ -293,8 +338,10 @@ document.getElementById("btn-clear").addEventListener("click", function(){
   document.getElementById("jd-input").value = "";
   document.getElementById("company-input").value = "";
   document.getElementById("title-input").value = "";
+  document.getElementById("url-input").value = "";
   document.getElementById("ocr-preview").innerHTML = "";
   document.getElementById("ocr-status").textContent = "";
+  document.getElementById("url-status").textContent = "사이트에 따라 자동 추출이 안 될 수 있어요. 안 되면 캡처 이미지나 텍스트 붙여넣기를 이용해주세요.";
   document.getElementById("results").innerHTML = '<p style="font-size:14px;color:var(--text-muted);text-align:center;padding:2rem 0;">채용공고를 입력하고 분석하기를 누르면 결과가 여기에 표시됩니다.</p>';
 });
 document.getElementById("file-input").addEventListener("change", async function(e){
@@ -312,6 +359,24 @@ document.getElementById("paste-zone").addEventListener("paste", async function(e
       await processImage(dataUrl);
       break;
     }
+  }
+});
+document.getElementById("btn-fetch-url").addEventListener("click", async function(){
+  const url = document.getElementById("url-input").value.trim();
+  const statusEl = document.getElementById("url-status");
+  if(!url){ statusEl.textContent = "링크를 입력해주세요."; return; }
+  statusEl.textContent = "채용공고 내용을 가져오는 중입니다... (10~20초 정도 걸릴 수 있어요)";
+  try{
+    const text = await fetchJobUrl(url);
+    if(!text || text.length < 30){
+      statusEl.textContent = "이 사이트는 자동 추출이 어려워요. 캡처 이미지나 텍스트 붙여넣기를 이용해주세요.";
+      return;
+    }
+    const ta = document.getElementById("jd-input");
+    ta.value = (ta.value ? ta.value + "\n\n" : "") + text;
+    statusEl.textContent = "가져오기 완료. 필요 없는 메뉴/광고 텍스트는 지우고 분석하기를 눌러주세요.";
+  } catch(err){
+    statusEl.textContent = "가져오기에 실패했습니다. 캡처 이미지나 텍스트 붙여넣기를 이용해주세요.";
   }
 });
 </script>
